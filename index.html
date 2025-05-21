@@ -3,28 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <title>File Sharing Platform</title>
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasAuthCode = urlParams.has("code");
-
-    if (!hasAuthCode) {
-      // Redirect to Cognito login only if no auth code in URL
-      window.location.href =
-        "https://us-east-1vlybwmp6c.auth.us-east-1.amazoncognito.com/login?client_id=425nf474pu7ikabi6o0cll9cg9&response_type=code&scope=email+openid+profile&redirect_uri=https://ibrahimmethaq.github.io/file-sharing-ui/";
-    }
-  </script>
 </head>
 <body style="font-family: sans-serif; padding: 2em;">
-  <h2>Upload File</h2>
+  <h2>📤 رفع ملف</h2>
   <input type="file" id="fileInput" />
-  <button onclick="uploadFile()">Upload</button>
+  <button onclick="uploadFile()">رفع</button>
   <p id="uploadStatus"></p>
 
   <hr>
 
-  <h2>Download File</h2>
-  <input type="text" id="fileNameDownload" placeholder="Enter file name (e.g., test.txt)" />
-  <button onclick="downloadFile()">Download</button>
+  <h2>📥 تحميل ملف</h2>
+  <input type="text" id="fileNameDownload" placeholder="اسم الملف مع الامتداد (مثال: test.txt)" />
+  <button onclick="downloadFile()">تحميل</button>
   <p id="downloadStatus"></p>
 
   <script>
@@ -34,7 +24,7 @@
       const fileInput = document.getElementById('fileInput');
       const status = document.getElementById('uploadStatus');
       if (!fileInput.files.length) {
-        status.textContent = 'Please select a file.';
+        status.textContent = '❗ اختر ملفًا أولاً.';
         return;
       }
 
@@ -42,13 +32,13 @@
       const response = await fetch(`${apiUrl}?fileName=${file.name}`, {
         method: 'POST',
         headers: {
-          'Content-Type': file.type || 'application/octet-stream',
+          'Content-Type': file.type || 'text/plain',
         },
         body: file,
       });
 
       const result = await response.text();
-      status.textContent = response.ok ? 'File uploaded successfully!' : `Error: ${result}`;
+      status.textContent = response.ok ? '✅ تم رفع الملف!' : `❌ خطأ: ${result}`;
     }
 
     function downloadFile() {
@@ -56,7 +46,7 @@
       const status = document.getElementById('downloadStatus');
 
       if (!fileName) {
-        status.textContent = 'Please enter a file name.';
+        status.textContent = '❗ أدخل اسم الملف أولاً.';
         return;
       }
 
@@ -65,7 +55,7 @@
       link.download = fileName;
       link.click();
 
-      status.textContent = 'Downloading...';
+      status.textContent = '⬇️ جارٍ تحميل الملف...';
     }
   </script>
 </body>

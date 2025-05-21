@@ -5,16 +5,16 @@
   <title>File Sharing Platform</title>
 </head>
 <body style="font-family: sans-serif; padding: 2em;">
-  <h2>📤 رفع ملف</h2>
+  <h2>Upload File</h2>
   <input type="file" id="fileInput" />
-  <button onclick="uploadFile()">رفع</button>
+  <button onclick="uploadFile()">Upload</button>
   <p id="uploadStatus"></p>
 
   <hr>
 
-  <h2>📥 تحميل ملف</h2>
-  <input type="text" id="fileNameDownload" placeholder="اسم الملف مع الامتداد (مثال: test.txt)" />
-  <button onclick="downloadFile()">تحميل</button>
+  <h2>Download File</h2>
+  <input type="text" id="fileNameDownload" placeholder="Enter file name (e.g., test.txt)" />
+  <button onclick="downloadFile()">Download</button>
   <p id="downloadStatus"></p>
 
   <script>
@@ -24,7 +24,7 @@
       const fileInput = document.getElementById('fileInput');
       const status = document.getElementById('uploadStatus');
       if (!fileInput.files.length) {
-        status.textContent = '❗ اختر ملفًا أولاً.';
+        status.textContent = 'Please select a file.';
         return;
       }
 
@@ -38,7 +38,7 @@
       });
 
       const result = await response.text();
-      status.textContent = response.ok ? '✅ تم رفع الملف!' : `❌ خطأ: ${result}`;
+      status.textContent = response.ok ? 'File uploaded successfully!' : `Error: ${result}`;
     }
 
     function downloadFile() {
@@ -46,7 +46,7 @@
       const status = document.getElementById('downloadStatus');
 
       if (!fileName) {
-        status.textContent = '❗ أدخل اسم الملف أولاً.';
+        status.textContent = 'Please enter a file name.';
         return;
       }
 
@@ -55,7 +55,7 @@
       link.download = fileName;
       link.click();
 
-      status.textContent = '⬇️ جارٍ تحميل الملف...';
+      status.textContent = 'Downloading...';
     }
   </script>
 </body>

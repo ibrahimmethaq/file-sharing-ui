@@ -1,10 +1,100 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>File Sharing Platform</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2em;
+      background-color: #f9f9f9;
+    }
+    h2 {
+      color: #333;
+    }
+    input[type="text"], input[type="file"] {
+      margin: 0.5em 0;
+    }
+    button {
+      margin-left: 0.5em;
+    }
+  </style>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasAuthCode = urlParams.has("code");
+
+    // Redirect to login if not authenticated
+    if (!hasAuthCode) {
+      window.location.href =
+        "https://us-east-1otl30hzr6.auth.us-east-1.amazoncognito.com/login?client_id=tb7r86q2tmftlj3u8ngl5obfl&response_type=code&scope=email+openid+profile&redirect_uri=https://ibrahimmethaq.github.io/file-sharing-ui/";
+    }
+
+    // API URL (replace if needed)
+    const apiUrl = 'https://6sl62euv5c.execute-api.us-east-1.amazonaws.com/dev/files';
+
+    // Upload file
+    async function uploadFile() {
+      const fileInput = document.getElementById("fileInput");
+      const status = document.getElementById("uploadStatus");
+
+      if (!fileInput.files.length) {
+        status.textContent = "Please choose a file.";
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      status.textContent = "Uploading...";
+
+      try {
+        const res = await fetch(apiUrl, {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await res.json();
+        status.textContent = res.ok ? "File uploaded successfully." : result.message || "Upload failed.";
+      } catch (err) {
+        status.textContent = "Error: " + err.message;
+      }
+    }
+
+    // Download file
+    async function downloadFile() {
+      const fileName = document.getElementById("fileNameDownload").value;
+      const status = document.getElementById("downloadStatus");
+
+      if (!fileName) {
+        status.textContent = "Please enter a file name.";
+        return;
+      }
+
+      status.textContent = "Downloading...";
+
+      try {
+        const res = await fetch(`${apiUrl}/${fileName}`);
+        if (!res.ok) {
+          status.textContent = "File not found or download failed.";
+          return;
+        }
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        status.textContent = "File downloaded.";
+      } catch (err) {
+        status.textContent = "Error: " + err.message;
+      }
+    }
+  </script>
 </head>
-<body style="font-family: sans-serif; padding: 2em;">
+<body>
   <h2>Upload File</h2>
   <input type="file" id="fileInput" />
   <button onclick="uploadFile()">Upload</button>
@@ -16,47 +106,5 @@
   <input type="text" id="fileNameDownload" placeholder="Enter file name (e.g., test.txt)" />
   <button onclick="downloadFile()">Download</button>
   <p id="downloadStatus"></p>
-
-  <script>
-    const apiUrl = 'https://6sl62euv5c.execute-api.us-east-1.amazonaws.com/dev/files';
-
-    async function uploadFile() {
-      const fileInput = document.getElementById('fileInput');
-      const status = document.getElementById('uploadStatus');
-      if (!fileInput.files.length) {
-        status.textContent = 'Please select a file.';
-        return;
-      }
-
-      const file = fileInput.files[0];
-      const response = await fetch(`${apiUrl}?fileName=${file.name}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': file.type || 'text/plain',
-        },
-        body: file,
-      });
-
-      const result = await response.text();
-      status.textContent = response.ok ? 'File uploaded successfully!' : `Error: ${result}`;
-    }
-
-    function downloadFile() {
-      const fileName = document.getElementById('fileNameDownload').value;
-      const status = document.getElementById('downloadStatus');
-
-      if (!fileName) {
-        status.textContent = 'Please enter a file name.';
-        return;
-      }
-
-      const link = document.createElement('a');
-      link.href = `${apiUrl}?fileName=${encodeURIComponent(fileName)}`;
-      link.download = fileName;
-      link.click();
-
-      status.textContent = 'Downloading...';
-    }
-  </script>
 </body>
 </html>

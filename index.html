@@ -4,8 +4,14 @@
   <meta charset="UTF-8">
   <title>File Sharing Platform</title>
   <script>
-    // Redirect to Cognito Login Page
-    window.location.href = "https://us-east-1vlybwmp6c.auth.us-east-1.amazoncognito.com/login?client_id=425nf474pu7ikabi6o0cll9cg9&response_type=code&scope=email+openid+profile&redirect_uri=https://ibrahimmethaq.github.io/file-sharing-ui/";
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasAuthCode = urlParams.has("code");
+
+    if (!hasAuthCode) {
+      // Redirect to Cognito login only if no auth code in URL
+      window.location.href =
+        "https://us-east-1vlybwmp6c.auth.us-east-1.amazoncognito.com/login?client_id=425nf474pu7ikabi6o0cll9cg9&response_type=code&scope=email+openid+profile&redirect_uri=https://ibrahimmethaq.github.io/file-sharing-ui/";
+    }
   </script>
 </head>
 <body style="font-family: sans-serif; padding: 2em;">
@@ -19,4 +25,48 @@
   <h2>Download File</h2>
   <input type="text" id="fileNameDownload" placeholder="Enter file name (e.g., test.txt)" />
   <button onclick="downloadFile()">Download</button>
-  <p id="downloadStatus
+  <p id="downloadStatus"></p>
+
+  <script>
+    const apiUrl = 'https://6sl62euv5c.execute-api.us-east-1.amazonaws.com/dev/files';
+
+    async function uploadFile() {
+      const fileInput = document.getElementById('fileInput');
+      const status = document.getElementById('uploadStatus');
+      if (!fileInput.files.length) {
+        status.textContent = 'Please select a file.';
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const response = await fetch(`${apiUrl}?fileName=${file.name}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream',
+        },
+        body: file,
+      });
+
+      const result = await response.text();
+      status.textContent = response.ok ? 'File uploaded successfully!' : `Error: ${result}`;
+    }
+
+    function downloadFile() {
+      const fileName = document.getElementById('fileNameDownload').value;
+      const status = document.getElementById('downloadStatus');
+
+      if (!fileName) {
+        status.textContent = 'Please enter a file name.';
+        return;
+      }
+
+      const link = document.createElement('a');
+      link.href = `${apiUrl}?fileName=${encodeURIComponent(fileName)}`;
+      link.download = fileName;
+      link.click();
+
+      status.textContent = 'Downloading...';
+    }
+  </script>
+</body>
+</html>
